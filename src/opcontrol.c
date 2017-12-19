@@ -94,9 +94,8 @@ int pidType(){
 		else{
 			count = 0;
 		}
-
-
 	}
+	
 	return count;
 }
 
@@ -227,7 +226,6 @@ void buttonCheck(struct PID *this, int type){
 
 void control(){
 	tempUpdate();
-
 	buttonCheck(this, pidType());
 }
 
