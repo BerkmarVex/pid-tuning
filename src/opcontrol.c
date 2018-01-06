@@ -79,10 +79,6 @@ void tempUpdate(){
 	pidSub = joystickGetDigital( 1, 8, JOY_DOWN);
 }
 
-struct PID whichPid(){
-  printf("boooo\n");
-};
-
 int pidType(){
 
 	if(changePidType && changePidType != previousChangePidType){
@@ -226,7 +222,10 @@ void buttonCheck(struct PID *this, int type){
 
 void control(){
 	tempUpdate();
-	buttonCheck(this, pidType());
+  /*************
+  *set PID HERE*
+  *************/
+	buttonCheck(&leftMotor, pidType());
 }
 
 void operatorControl() {
