@@ -220,12 +220,17 @@ void buttonCheck(struct PID *this, int type){
 	}
 }
 
+void logPid(struct PID *this){
+  printf("Kp(%f), Ki(%f), Kd(%f)\n", this->Kp, this->Ki, this->Kd);
+}
+
 void control(){
 	tempUpdate();
   /*************
   *set PID HERE*
   *************/
 	buttonCheck(&leftMotor, pidType());
+  logPid(&leftMotor);
 }
 
 void operatorControl() {
