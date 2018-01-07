@@ -224,17 +224,18 @@ void logPid(struct PID *this){
   printf("Kp(%f), Ki(%f), Kd(%f)\n", this->Kp, this->Ki, this->Kd);
 }
 
-void control(){
+void control(struct PID *this){
 	tempUpdate();
   /*************
   *set PID HERE*
   *************/
-	buttonCheck(&leftMotor, pidType());
-  logPid(&leftMotor);
+	buttonCheck(this, pidType());
+  logPid(this);
 }
 
 void operatorControl() {
 	while (1) {
+    control(&leftMotor);
 		delay(20);
 	}
 }
