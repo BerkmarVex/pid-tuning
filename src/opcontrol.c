@@ -1,5 +1,7 @@
 #include "main.h"
 
+void motorSet(unsigned char channel, int speed);
+
 bool dumpValues;
 bool timesTen;
 bool changePID;
@@ -12,20 +14,20 @@ int count = 0;
 int PidCount = 0;
 
 struct PID {
-      int sensor;
-      int target;
-      int error;
-      int previous_error;
-      double Kp;
-      double Ki;
-      double Kd;
-      int bias;
-      int iTime;
-      int integral;
-      int derivative;
-      double pid;
-      int output;
-  };
+  int sensor;
+  int target;
+  int error;
+  int previous_error;
+  double Kp;
+  double Ki;
+  double Kd;
+  int bias;
+  int iTime;
+  int integral;
+  int derivative;
+  double pid;
+  int output;
+};
 
 struct PID leftMotor = {
   .Kp = 0.3,
@@ -68,6 +70,27 @@ struct PID glLift = {
   .bias = 0,
   .integral = 0
 };
+
+int pidDo(struct PID *this) {
+	this->error = this->target - this->sensor;
+	//this->integral = this->integral + (this->error);
+	this->derivative = (this->error - this->previous_error);
+
+  if(abs(this->error) > 5){
+    //this->integral = this->error/(abs(this->derivative) + 10) + this->integral;
+    this->integral += this->error*exp(-(pow(0.1,2) * pow(this->derivative,2)));
+  }
+
+  else if(-this->derivative > this->error||abs(this->error) <= 5){
+    this->integral = 0;
+  }
+
+	this->pid = (this->Kp) * this->error + (this->Ki) * this->integral + (this->Kd) * this->derivative + this->bias;
+	this->output = (int) this->pid;
+	this->previous_error = this->error;
+  return -this->output;
+};
+
 void tempUpdate(){
 	dumpValues = joystickGetDigital( 1, 7, JOY_UP);
 	timesTen = joystickGetDigital( 1, 7, JOY_RIGHT);
@@ -75,13 +98,15 @@ void tempUpdate(){
 	divTen = joystickGetDigital( 1, 7, JOY_LEFT);
 	pidAdd = joystickGetDigital( 1, 8, JOY_UP);
 	changePidType = joystickGetDigital(1, 8, JOY_RIGHT);
-	previousChangePidType = changePidType;
+	//printf("%d\n" ,changePidType);
 	pidSub = joystickGetDigital( 1, 8, JOY_DOWN);
+  imeGet(0, &leftMotor.sensor);
+  leftMotor.sensor = 1 * leftMotor.sensor;
 }
 
 int pidType(){
 
-	if(changePidType && changePidType != previousChangePidType){
+	if(changePidType != previousChangePidType){
 
 		if(count < 3){
 			count += 1;
@@ -91,7 +116,7 @@ int pidType(){
 			count = 0;
 		}
 	}
-
+	//printf("%d\n", count);
 	return count;
 }
 
@@ -227,10 +252,12 @@ void logPid(struct PID *this){
 void control(struct PID *this){
 	tempUpdate();
   /*************
-  *set PID HERE*
+  *set PID HERE* 
   *************/
 	buttonCheck(this, pidType());
   logPid(this);
+  motorSet(2, pidDo(this));
+	previousChangePidType = changePidType;
 }
 
 void operatorControl() {
